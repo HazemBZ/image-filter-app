@@ -16,18 +16,17 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
 
   app.get('/filteredimage', async (req, res) => {
-    const {image_url} = req.query
+    const image_url: string = req.query.image_url || ''
     
     if(!image_url)
       return res.status(400).send({message: 'image_url is required'})
-    
-   await filterImageFromURL(image_url).then(img => {
-    const resp = res.status(200).sendFile(img)
-    deleteLocalFiles([img])
-    return resp
-   }).catch(err => {
-    return res.status(400).send({error: err})
-   })
+    await filterImageFromURL(image_url)
+    .then(saved_image => {
+      res.status(200).sendFile(saved_image, async () => await deleteLocalFiles([saved_image]))
+    })
+    .catch(err => {
+      return res.status(400).send({message: `Failed to process image: ${image_url}`, error: err})
+    })
   
   })
   
