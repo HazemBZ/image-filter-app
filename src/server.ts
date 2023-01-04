@@ -20,10 +20,15 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
     
     if(!image_url)
       return res.status(400).send({message: 'image_url is required'})
-    console.log(image_url)
-
-  /**************************************************************************** */
-
+    
+   await filterImageFromURL(image_url).then(img => {
+    const resp = res.status(200).sendFile(img)
+    deleteLocalFiles([img])
+    return resp
+   }).catch(err => {
+    return res.status(400).send({error: err})
+   })
+  
   })
   
   // Root Endpoint
